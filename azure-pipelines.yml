@@ -11,7 +11,7 @@ trigger:
 - main
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: windows-latest
 
 steps:
 - script: echo Building Shit
@@ -25,7 +25,7 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'restore'
-    projects: '**/*.sln'
+    projects: '**/*.csproj'
     feedsToUse: 'select'
     vstsFeed: 'd6f15244-838b-427c-b02a-76d6aea51dcc'
 - task: DotNetCoreCLI@2
