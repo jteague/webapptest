@@ -17,29 +17,35 @@ steps:
 - script: echo Building Shit
   displayName: 'Run a one-line script'
 
+# Set .NET version
 - task: UseDotNet@2
   inputs:
     packageType: 'sdk'
     version: '6.0.x'
     
+# dotnet restore
 - task: DotNetCoreCLI@2
   inputs:
     command: 'restore'
     projects: '**/*.csproj'
     feedsToUse: 'select'
     vstsFeed: 'd6f15244-838b-427c-b02a-76d6aea51dcc'
+
+# dotnet build
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
     projects: '**/*.sln'
     arguments: '-c $(BuildConfiguration)'
     
+# dotnet publish Web API
 - task: DotNetCoreCLI@2
   inputs:
     command: 'publish'
     publishWebProjects: true
     arguments: '-c $(BuildConfiguration) -o $(Build.ArtifactStagingDirectory)\publish\WebApi'
     
+# dotnet publish Web Job
 - task: DotNetCoreCLI@2
   inputs:
     command: 'publish'
@@ -49,6 +55,7 @@ steps:
     projects: '**/WebJobTest.csproj'
     arguments: '-c $(BuildConfiguration) -o $(Build.ArtifactStagingDirectory)\publish\WebJob\App_Data\jobs\continuous\WebJobTest'
 
+# Create run.cmd for Web Job
 - task: AzurePowerShell@5
   inputs:
     azureSubscription: 'MiahSubscription (af4b71ad-280e-4024-a78e-2a1e8b74abd4)'
@@ -56,14 +63,25 @@ steps:
     Inline: '"dotnet WebJobTest.dll" | Out-File run.cmd -Encoding ASCII; $LastExitCode'
     workingDirectory: '$(Build.ArtifactStagingDirectory)\publish\WebJob\App_Data\jobs\continuous\WebJobTest'
 
+# Zip Web Job
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\publish\WebJob'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/publish/WebJob/WebJobTest.zip'
+    replaceExistingArchive: true
+
+# Push Web API artifact
 - task: PublishPipelineArtifact@1
   inputs:
     targetPath: '$(Build.ArtifactStagingDirectory)\publish\WebApi'
     artifact: 'drop'
     publishLocation: 'pipeline'
     
+# Push Web Job artifact
 - task: PublishPipelineArtifact@1
   inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)\publish\WebJob\App_Data\jobs\continuous\WebJobTest'
+    targetPath: '$(Build.ArtifactStagingDirectory)\publish\WebJob'
     artifact: 'webjobdrop'
     publishLocation: 'pipeline'
