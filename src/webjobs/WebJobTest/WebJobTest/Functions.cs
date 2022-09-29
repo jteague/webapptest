@@ -7,7 +7,7 @@ namespace WebJobTest
     {
         public static void ProcessQueueMessage([QueueTrigger("queue")] string message, ILogger logger)
         {
-            logger.LogInformation(message);
+            logger.LogWarning(message);
         }
     }
 }
