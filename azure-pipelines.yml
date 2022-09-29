@@ -62,8 +62,8 @@ steps:
     artifact: 'drop'
     publishLocation: 'pipeline'
     
-- task: PublishPipelineArtifact@1
-  inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)\publish\App_Data\jobs\continuous\WebJobTest'
-    artifact: 'webjobdrop'
-    publishLocation: 'pipeline'
+# - task: PublishPipelineArtifact@1
+#   inputs:
+#     targetPath: '$(Build.ArtifactStagingDirectory)\publish\App_Data\jobs\continuous\WebJobTest'
+#     artifact: 'webjobdrop'
+#     publishLocation: 'pipeline'
