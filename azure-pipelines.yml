@@ -60,6 +60,7 @@ steps:
   inputs:
     azureSubscription: 'MiahSubscription (af4b71ad-280e-4024-a78e-2a1e8b74abd4)'
     ScriptType: 'InlineScript'
+    TargetAzurePs: 'latestVersion'
     Inline: '"dotnet WebJobTest.dll" | Out-File run.cmd -Encoding ASCII; $LastExitCode'
     workingDirectory: '$(Build.ArtifactStagingDirectory)\publish\WebJob\App_Data\jobs\continuous\WebJobTest'
 
