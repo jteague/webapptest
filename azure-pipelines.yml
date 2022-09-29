@@ -38,17 +38,23 @@ steps:
   inputs:
     command: 'publish'
     publishWebProjects: true
-    arguments: '-c $(BuildConfiguration) -o $(Build.ArtifactStagingDirectory)'
+    arguments: '-c $(BuildConfiguration) -o $(Build.ArtifactStagingDirectory)\publish\WebApi'
     
 - task: DotNetCoreCLI@2
   inputs:
     command: 'publish'
     publishWebProjects: false
     projects: '**/WebJobTest.csproj'
-    arguments: '-c $(BuildConfiguration) -o $(Build.ArtifactStagingDirectory)'
+    arguments: '-c $(BuildConfiguration) -o $(Build.ArtifactStagingDirectory)\publish\WebJob'
 
 - task: PublishPipelineArtifact@1
   inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)'
+    targetPath: '$(Build.ArtifactStagingDirectory)\publish\WebApi'
+    artifact: 'drop'
+    publishLocation: 'pipeline'
+    
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(Build.ArtifactStagingDirectory)\publish\WebJob'
     artifact: 'drop'
     publishLocation: 'pipeline'
