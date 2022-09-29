@@ -44,8 +44,17 @@ steps:
   inputs:
     command: 'publish'
     publishWebProjects: false
+    zipAfterPublish: false
+    modifyOutputPath: false
     projects: '**/WebJobTest.csproj'
-    arguments: '-c $(BuildConfiguration) -o $(Build.ArtifactStagingDirectory)\publish\WebJob'
+    arguments: '-c $(BuildConfiguration) -o $(Build.ArtifactStagingDirectory)\publish\App_Data\jobs\continuous\WebJobTest'
+
+- task: AzurePowerShell@5
+  inputs:
+    azureSubscription: 'MiahSubscription (af4b71ad-280e-4024-a78e-2a1e8b74abd4)'
+    ScriptType: 'InlineScript'
+    Inline: '"dotnet WebJobTest.dll" | Out-File run.cmd -Encoding ASCII; $LastExitCode'
+    workingDirectory: '$(Build.ArtifactStagingDirectory)\publish\App_Data\jobs\continuous\WebJobTest'
 
 - task: PublishPipelineArtifact@1
   inputs:
@@ -55,6 +64,6 @@ steps:
     
 - task: PublishPipelineArtifact@1
   inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)\publish\WebJob'
+    targetPath: '$(Build.ArtifactStagingDirectory)\publish\App_Data\jobs\continuous\WebJobTest'
     artifact: 'webjobdrop'
     publishLocation: 'pipeline'
