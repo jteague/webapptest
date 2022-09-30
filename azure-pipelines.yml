@@ -46,32 +46,32 @@ steps:
     arguments: '-c $(BuildConfiguration) -o $(Build.ArtifactStagingDirectory)\publish\WebApi'
     
 # dotnet publish Web Job
-- task: DotNetCoreCLI@2
-  inputs:
-    command: 'publish'
-    publishWebProjects: false
-    zipAfterPublish: false
-    modifyOutputPath: false
-    projects: '**/WebJobTest.csproj'
-    arguments: '-c $(BuildConfiguration) -o $(Build.ArtifactStagingDirectory)\publish\WebJob\App_Data\jobs\continuous\WebJobTest'
+# - task: DotNetCoreCLI@2
+#   inputs:
+#     command: 'publish'
+#     publishWebProjects: false
+#     zipAfterPublish: false
+#     modifyOutputPath: false
+#     projects: '**/WebJobTest.csproj'
+#     arguments: '-c $(BuildConfiguration) -o $(Build.ArtifactStagingDirectory)\publish\WebJob\App_Data\jobs\continuous\WebJobTest'
 
 # Create run.cmd for Web Job
-- task: AzurePowerShell@5
-  inputs:
-    azureSubscription: 'MiahSubscription (af4b71ad-280e-4024-a78e-2a1e8b74abd4)'
-    ScriptType: 'InlineScript'
-    TargetAzurePs: 'latestVersion'
-    Inline: '"dotnet WebJobTest.dll" | Out-File run.cmd -Encoding ASCII; $LastExitCode'
-    workingDirectory: '$(Build.ArtifactStagingDirectory)\publish\WebJob\App_Data\jobs\continuous\WebJobTest'
+# - task: AzurePowerShell@5
+#   inputs:
+#     azureSubscription: 'MiahSubscription (af4b71ad-280e-4024-a78e-2a1e8b74abd4)'
+#     ScriptType: 'InlineScript'
+#     TargetAzurePs: 'latestVersion'
+#     Inline: '"dotnet WebJobTest.dll" | Out-File run.cmd -Encoding ASCII; $LastExitCode'
+#     workingDirectory: '$(Build.ArtifactStagingDirectory)\publish\WebJob\App_Data\jobs\continuous\WebJobTest'
 
 # Zip Web Job
-- task: ArchiveFiles@2
-  inputs:
-    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\publish\WebJob'
-    includeRootFolder: false
-    archiveType: 'zip'
-    archiveFile: '$(Build.ArtifactStagingDirectory)/publish/WebJob/WebJobTest.zip'
-    replaceExistingArchive: true
+# - task: ArchiveFiles@2
+#   inputs:
+#     rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\publish\WebJob'
+#     includeRootFolder: false
+#     archiveType: 'zip'
+#     archiveFile: '$(Build.ArtifactStagingDirectory)/publish/WebJob/WebJobTest.zip'
+#     replaceExistingArchive: true
 
 # Push Web API artifact
 - task: PublishPipelineArtifact@1
@@ -81,8 +81,8 @@ steps:
     publishLocation: 'pipeline'
     
 # Push Web Job artifact
-- task: PublishPipelineArtifact@1
-  inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)\publish\WebJob'
-    artifact: 'webjobdrop'
-    publishLocation: 'pipeline'
+# - task: PublishPipelineArtifact@1
+#   inputs:
+#     targetPath: '$(Build.ArtifactStagingDirectory)\publish\WebJob'
+#     artifact: 'webjobdrop'
+#     publishLocation: 'pipeline'
