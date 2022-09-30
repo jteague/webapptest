@@ -1,11 +1,4 @@
-# Starter pipeline
-#- task: DotNetCoreCLI@2
-#  inputs:
-#    command: 'build'
-#    projects: '**/*.sln'
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+# Builds Web API and Web Job and produces the zipped artifacts
 
 trigger:
 - main
@@ -17,44 +10,86 @@ steps:
 - script: echo Building Shit
   displayName: 'Run a one-line script'
 
+# Set .NET version
 - task: UseDotNet@2
   inputs:
     packageType: 'sdk'
     version: '6.0.x'
     
+# dotnet restore
 - task: DotNetCoreCLI@2
   inputs:
     command: 'restore'
     projects: '**/*.csproj'
     feedsToUse: 'select'
     vstsFeed: 'd6f15244-838b-427c-b02a-76d6aea51dcc'
+
+# dotnet build solution
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
     projects: '**/*.sln'
     arguments: '-c $(BuildConfiguration)'
     
+########################################
+# Web API
+########################################
+# Web API - dotnet publish
 - task: DotNetCoreCLI@2
   inputs:
     command: 'publish'
     publishWebProjects: true
     arguments: '-c $(BuildConfiguration) -o $(Build.ArtifactStagingDirectory)\publish\WebApi'
     
-- task: DotNetCoreCLI@2
-  inputs:
-    command: 'publish'
-    publishWebProjects: false
-    projects: '**/WebJobTest.csproj'
-    arguments: '-c $(BuildConfiguration) -o $(Build.ArtifactStagingDirectory)\publish\WebJob'
-
+# Web API - Push artifact to staging dir
 - task: PublishPipelineArtifact@1
   inputs:
     targetPath: '$(Build.ArtifactStagingDirectory)\publish\WebApi'
     artifact: 'drop'
     publishLocation: 'pipeline'
     
+########################################
+# Web Job
+########################################
+# Web Job - dotnet publish
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'publish'
+    publishWebProjects: false
+    zipAfterPublish: false
+    modifyOutputPath: false
+    projects: '**/WebJobTest.csproj'
+    arguments: '-c $(BuildConfiguration) -o $(Build.ArtifactStagingDirectory)\temp\publish\WebJob\App_Data\jobs\continuous\WebJobTest'
+
+# Web Job - Create run.cmd for Web Job to start
+- task: AzurePowerShell@5
+  inputs:
+    azureSubscription: 'MiahSubscription (af4b71ad-280e-4024-a78e-2a1e8b74abd4)'
+    ScriptType: 'InlineScript'
+    TargetAzurePs: 'latestVersion'
+    Inline: '"dotnet WebJobTest.dll" | Out-File run.cmd -Encoding ASCII; $LastExitCode'
+    workingDirectory: '$(Build.ArtifactStagingDirectory)\temp\publish\WebJob\App_Data\jobs\continuous\WebJobTest'
+
+# Web Job - Zip Web Job
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\temp\publish\WebJob'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/publish/WebJob/WebJobTest.zip'
+    replaceExistingArchive: true
+
+# Web Job - Push to artifact dir
 - task: PublishPipelineArtifact@1
   inputs:
     targetPath: '$(Build.ArtifactStagingDirectory)\publish\WebJob'
     artifact: 'webjobdrop'
     publishLocation: 'pipeline'
+
+# Web Job - Clean up Temp dir within artifact dir
+- task: AzurePowerShell@5
+  inputs:
+    azureSubscription: 'MiahSubscription (af4b71ad-280e-4024-a78e-2a1e8b74abd4)'
+    ScriptType: 'InlineScript'
+    Inline: 'remove-item "$(Build.ArtifactStagingDirectory)\temp" -Recurse -Force'
+    azurePowerShellVersion: 'LatestVersion'
