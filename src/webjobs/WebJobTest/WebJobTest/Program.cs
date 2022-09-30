@@ -15,6 +15,7 @@ namespace WebJobsSDKSample
             {
                 b.AddAzureStorageCoreServices();
                 b.AddAzureStorageQueues();
+
             });
 
             builder.ConfigureLogging((context, b) =>
